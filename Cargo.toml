@@ -1,0 +1,11 @@
+[package]
+name = "blurst"
+version = "0.1.0"
+authors = ["Ben Wolsieffer <benwolsieffer@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+dbus = "0.9.3"
+thiserror = "1.0.25"
+uuid = "0.8.2"
+log = "0.4.14"
