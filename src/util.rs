@@ -16,6 +16,6 @@ impl Timeout {
     pub fn get(&self) -> Duration {
         self.timeout
             .checked_sub(self.start.elapsed())
-            .unwrap_or(Duration::from_millis(0))
+            .unwrap_or_else(||Duration::from_millis(0))
     }
 }

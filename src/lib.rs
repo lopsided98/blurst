@@ -5,7 +5,6 @@ use std::time::Duration;
 use gen::*;
 use thiserror::Error;
 use uuid::Uuid;
-use Adapter1;
 
 use crate::dbus::{ObjectManagerCache, RefArgCast, RefArgIter};
 
@@ -278,7 +277,7 @@ impl Adapter {
             .find_map_object(
                 |path, interfaces| {
                     interfaces
-                        .get(Device::INTERFACE.into())
+                        .get(Device::INTERFACE)
                         .and_then(|p| match f(p) {
                             Ok(true) => Some(Ok(p)),
                             Ok(false) => None,
@@ -440,6 +439,8 @@ impl Device {
         Ok(self.device.paired()?)
     }
 
+    /// Get the service data from the most recent advertisement. If no service
+    /// data is available from BlueZ, and empty map will be returned.
     pub fn service_data(&self) -> Result<HashMap<Uuid, Vec<u8>>, Error> {
         Ok(self
             .properties
@@ -454,7 +455,7 @@ impl Device {
                     .collect()
             })
             .transpose()?
-            .unwrap_or(HashMap::new()))
+            .unwrap_or_default())
     }
 
     pub fn rssi(&self) -> Result<i16, Error> {
@@ -507,7 +508,7 @@ impl Device {
                         property: "Device",
                     })
                     .and_then(|d| Ok(<&str>::ref_arg_cast(d)?))
-                    .map(|d| dbus::Path::from(d))
+                    .map(dbus::Path::from)
                     .map(|device| device == self.device.path)?
                     && f(interface)?
                 {

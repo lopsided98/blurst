@@ -212,18 +212,15 @@ impl ObjectManagerDatabase {
         interfaces: Vec<String>,
     ) {
         let remove = |objects: &mut HashMap<dbus::strings::Path<'static>, Object>| {
-            match objects.entry(object.clone()) {
-                hash_map::Entry::Occupied(mut e) => {
-                    let obj = e.get_mut();
-                    interfaces.iter().for_each(|i| {
-                        obj.remove(i);
-                    });
-                    if obj.is_empty() {
-                        e.remove();
-                    }
+            if let hash_map::Entry::Occupied(mut e) = objects.entry(object.clone()) {
+                let obj = e.get_mut();
+                interfaces.iter().for_each(|i| {
+                    obj.remove(i);
+                });
+                if obj.is_empty() {
+                    e.remove();
                 }
-                _ => (),
-            };
+            }
         };
         remove(&mut self.objects);
         remove(&mut self.queue);
@@ -339,20 +336,18 @@ pub struct PropertyCache<'a, C: Deref<Target = dbus::blocking::LocalConnection>>
 
 impl<'a, C: Deref<Target = dbus::blocking::LocalConnection>> PropertyCache<'a, C> {
     pub fn new(proxy: dbus::blocking::Proxy<'a, C>) -> Result<Self, TypedError> {
-        let properties = Rc::new(RefCell::new(HashMap::new()));
+        let properties = Rc::new(RefCell::new(HashMap::<_, PropMap>::new()));
 
         // Subscribe to interfaces added and removed signals
         let properties_changed_token = {
             let properties = properties.clone();
             proxy.match_signal(move |h: PropertiesPropertiesChanged, _: &_, _: &_| {
-                properties.borrow_mut().get_mut(&h.interface_name).map(
-                    |interface: &mut PropMap| {
-                        interface.extend(h.changed_properties);
-                        h.invalidated_properties.iter().for_each(|k| {
-                            interface.remove(k);
-                        });
-                    },
-                );
+                if let Some(interface) = properties.borrow_mut().get_mut(&h.interface_name) {
+                    interface.extend(h.changed_properties);
+                    h.invalidated_properties.iter().for_each(|k| {
+                        interface.remove(k);
+                    });
+                }
                 true
             })?
         };
