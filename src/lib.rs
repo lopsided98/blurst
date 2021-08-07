@@ -329,40 +329,9 @@ impl Adapter {
         )
     }
 
-    pub fn find_devices_by_uuid(
-        &self,
-        uuid: &Uuid,
-        device_timeout: Duration,
-        timeout: Duration,
-    ) -> Result<Vec<Device>, Error> {
-        self.find_devices(
-            |p| {
-                p.get("UUIDs")
-                    .map(|u| -> Result<RefArgIter<&str>, Error> {
-                        Ok(RefArgIter::ref_arg_cast(&u.0)?)
-                    })
-                    .map_or(Ok(false), |r| {
-                        r.map(|i| {
-                            i.map(|r| r.map_err(Error::from).and_then(|u| Ok(Uuid::parse_str(u)?)))
-                        })
-                        .and_then(|mut i| {
-                            i.find_map(|r| match r {
-                                Ok(u) if &u == uuid => Some(Ok(true)),
-                                Ok(_) => None,
-                                Err(e) => Some(Err(e)),
-                            })
-                            .unwrap_or(Ok(false))
-                        })
-                    })
-            },
-            device_timeout,
-            timeout,
-        )
-    }
-
     pub fn find_devices_by_uuids(
         &self,
-        uuids: &HashSet<Uuid>,
+        f: impl Fn(HashSet<Uuid>) -> bool,
         device_timeout: Duration,
         timeout: Duration,
     ) -> Result<Vec<Device>, Error> {
@@ -377,9 +346,48 @@ impl Adapter {
                             i.map(|r| r.map_err(Error::from).and_then(|u| Ok(Uuid::parse_str(u)?)))
                         })
                         .and_then(|i| i.collect::<Result<HashSet<_>, _>>())
-                        .map(|u| u.is_superset(uuids))
+                        .map(&f)
                     })
             },
+            device_timeout,
+            timeout,
+        )
+    }
+
+    pub fn find_devices_with_uuid(
+        &self,
+        uuid: &Uuid,
+        device_timeout: Duration,
+        timeout: Duration,
+    ) -> Result<Vec<Device>, Error> {
+        self.find_devices_by_uuids(
+            |uuids| uuids.contains(uuid),
+            device_timeout,
+            timeout,
+        )
+    }
+
+    pub fn find_devices_with_uuids(
+        &self,
+        uuids: &HashSet<Uuid>,
+        device_timeout: Duration,
+        timeout: Duration,
+    ) -> Result<Vec<Device>, Error> {
+        self.find_devices_by_uuids(
+            |u| !u.is_disjoint(uuids),
+            device_timeout,
+            timeout,
+        )
+    }
+
+    pub fn find_devices_with_all_uuids(
+        &self,
+        uuids: &HashSet<Uuid>,
+        device_timeout: Duration,
+        timeout: Duration,
+    ) -> Result<Vec<Device>, Error> {
+        self.find_devices_by_uuids(
+            |u| u.is_superset(uuids),
             device_timeout,
             timeout,
         )
