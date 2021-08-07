@@ -339,7 +339,7 @@ impl Adapter {
             |p| {
                 p.get("UUIDs")
                     .map(|u| -> Result<RefArgIter<&str>, Error> {
-                        Ok(RefArgIter::ref_arg_cast(u)?)
+                        Ok(RefArgIter::ref_arg_cast(&u.0)?)
                     })
                     .map_or(Ok(false), |r| {
                         r.map(|i| {
