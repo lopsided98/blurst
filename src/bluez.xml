@@ -35,6 +35,9 @@
         <method name="GetDiscoveryFilters">
             <arg name="filters" type="as" direction="out"/>
         </method>
+        <method name="ConnectDevice">
+            <arg name="properties" type="a{sv}" direction="in"/>
+        </method>
         <property name="Address" type="s" access="read"></property>
         <property name="AddressType" type="s" access="read"></property>
         <property name="Name" type="s" access="read"></property>
@@ -48,18 +51,35 @@
         <property name="Discovering" type="b" access="read"></property>
         <property name="UUIDs" type="as" access="read"></property>
         <property name="Modalias" type="s" access="read"></property>
+        <property name="Roles" type="as" access="read"></property>
+        <property name="ExperimentalFeatures" type="as" access="read"></property>
     </interface>
-    <interface name="org.bluez.LEAdvertisingManager1">
-        <method name="RegisterAdvertisement">
-            <arg name="advertisement" type="o" direction="in"/>
+    <interface name="org.bluez.BatteryProviderManager1">
+        <method name="RegisterBatteryProvider">
+            <arg name="provider" type="o" direction="in"/>
+        </method>
+        <method name="UnregisterBatteryProvider">
+            <arg name="provider" type="o" direction="in"/>
+        </method>
+    </interface>
+    <interface name="org.bluez.GattManager1">
+        <method name="RegisterApplication">
+            <arg name="application" type="o" direction="in"/>
             <arg name="options" type="a{sv}" direction="in"/>
         </method>
-        <method name="UnregisterAdvertisement">
-            <arg name="service" type="o" direction="in"/>
+        <method name="UnregisterApplication">
+            <arg name="application" type="o" direction="in"/>
         </method>
-        <property name="ActiveInstances" type="y" access="read"></property>
-        <property name="SupportedInstances" type="y" access="read"></property>
-        <property name="SupportedIncludes" type="as" access="read"></property>
+    </interface>
+    <interface name="org.bluez.AdvertisementMonitorManager1">
+        <method name="RegisterMonitor">
+            <arg name="application" type="o" direction="in"/>
+        </method>
+        <method name="UnregisterMonitor">
+            <arg name="application" type="o" direction="in"/>
+        </method>
+        <property name="SupportedMonitorTypes" type="as" access="read"></property>
+        <property name="SupportedFeatures" type="as" access="read"></property>
     </interface>
     <interface name="org.bluez.Media1">
         <method name="RegisterEndpoint">
@@ -76,6 +96,13 @@
         <method name="UnregisterPlayer">
             <arg name="player" type="o" direction="in"/>
         </method>
+        <method name="RegisterApplication">
+            <arg name="application" type="o" direction="in"/>
+            <arg name="options" type="a{sv}" direction="in"/>
+        </method>
+        <method name="UnregisterApplication">
+            <arg name="application" type="o" direction="in"/>
+        </method>
     </interface>
     <interface name="org.bluez.NetworkServer1">
         <method name="Register">
@@ -85,6 +112,21 @@
         <method name="Unregister">
             <arg name="uuid" type="s" direction="in"/>
         </method>
+    </interface>
+    <interface name="org.bluez.LEAdvertisingManager1">
+        <method name="RegisterAdvertisement">
+            <arg name="advertisement" type="o" direction="in"/>
+            <arg name="options" type="a{sv}" direction="in"/>
+        </method>
+        <method name="UnregisterAdvertisement">
+            <arg name="service" type="o" direction="in"/>
+        </method>
+        <property name="ActiveInstances" type="y" access="read"></property>
+        <property name="SupportedInstances" type="y" access="read"></property>
+        <property name="SupportedIncludes" type="as" access="read"></property>
+        <property name="SupportedSecondaryChannels" type="as" access="read"></property>
+        <property name="SupportedFeatures" type="as" access="read"></property>
+        <property name="SupportedCapabilities" type="a{sv}" access="read"></property>
     </interface>
     <interface name="org.bluez.Device1">
         <method name="Disconnect"></method>
@@ -117,6 +159,9 @@
         <property name="ServiceData" type="a{sv}" access="read"></property>
         <property name="TxPower" type="n" access="read"></property>
         <property name="ServicesResolved" type="b" access="read"></property>
+        <property name="AdvertisingFlags" type="ay" access="read"></property>
+        <property name="AdvertisingData" type="a{yv}" access="read"></property>
+        <property name="WakeAllowed" type="b" access="readwrite"></property>
     </interface>
     <interface name="org.bluez.Battery1">
         <property name="Percentage" type="y" access="read"></property>
