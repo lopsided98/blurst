@@ -133,7 +133,7 @@ impl Bluez {
         let connection = Rc::new(dbus::blocking::LocalConnection::new_system()?);
 
         let bus_name = dbus::strings::BusName::from(Self::BUS_NAME);
-        let root_path = dbus::strings::Path::from("/");
+        let root_path = "/".into();
 
         Ok(Self {
             connection: connection.clone(),
@@ -360,11 +360,7 @@ impl Adapter {
         device_timeout: Duration,
         timeout: Duration,
     ) -> Result<Vec<Device>, Error> {
-        self.find_devices_by_uuids(
-            |uuids| uuids.contains(uuid),
-            device_timeout,
-            timeout,
-        )
+        self.find_devices_by_uuids(|uuids| uuids.contains(uuid), device_timeout, timeout)
     }
 
     pub fn find_devices_with_uuids(
@@ -373,11 +369,7 @@ impl Adapter {
         device_timeout: Duration,
         timeout: Duration,
     ) -> Result<Vec<Device>, Error> {
-        self.find_devices_by_uuids(
-            |u| !u.is_disjoint(uuids),
-            device_timeout,
-            timeout,
-        )
+        self.find_devices_by_uuids(|u| !u.is_disjoint(uuids), device_timeout, timeout)
     }
 
     pub fn find_devices_with_all_uuids(
@@ -386,11 +378,7 @@ impl Adapter {
         device_timeout: Duration,
         timeout: Duration,
     ) -> Result<Vec<Device>, Error> {
-        self.find_devices_by_uuids(
-            |u| u.is_superset(uuids),
-            device_timeout,
-            timeout,
-        )
+        self.find_devices_by_uuids(|u| u.is_superset(uuids), device_timeout, timeout)
     }
 }
 
