@@ -7,7 +7,7 @@ stdenv.mkDerivation {
     rustc
     cargo
     pkgconfig
-    rustfmt
+    (rustfmt.override { asNightly = true; })
     clippy
     crate2nix
   ];
