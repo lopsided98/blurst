@@ -6,7 +6,6 @@ edition = "2018"
 
 [dependencies]
 dbus = "0.9.3"
-dbus-crossroads = "0.4.0"
-thiserror = "1.0.28"
+thiserror = "1.0.25"
 uuid = "0.8.2"
 log = "0.4.14"
