@@ -212,13 +212,13 @@ impl Bluez {
 }
 
 #[derive(Clone, Copy, Debug)]
-pub enum Transport {
+pub enum DiscoveryTransport {
     Auto,
     BrEdr,
     Le,
 }
 
-impl ToString for Transport {
+impl ToString for DiscoveryTransport {
     fn to_string(&self) -> String {
         match self {
             Self::Auto => "auto",
@@ -234,7 +234,7 @@ pub struct DiscoveryFilter {
     pub uuids: Option<Vec<Uuid>>,
     pub rssi: Option<i16>,
     pub path_loss: Option<u16>,
-    pub transport: Transport,
+    pub transport: DiscoveryTransport,
     pub duplicate_data: bool,
     pub discoverable: bool,
     pub pattern: String,
@@ -246,7 +246,7 @@ impl Default for DiscoveryFilter {
             uuids: None,
             rssi: None,
             path_loss: None,
-            transport: Transport::Auto,
+            transport: DiscoveryTransport::Auto,
             duplicate_data: true,
             discoverable: false,
             pattern: "".into(),
