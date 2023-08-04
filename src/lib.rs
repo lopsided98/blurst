@@ -211,6 +211,49 @@ impl Bluez {
     }
 }
 
+#[derive(Clone, Copy, Debug)]
+pub enum Transport {
+    Auto,
+    BrEdr,
+    Le,
+}
+
+impl ToString for Transport {
+    fn to_string(&self) -> String {
+        match self {
+            Self::Auto => "auto",
+            Self::BrEdr => "bredr",
+            Self::Le => "le",
+        }
+        .into()
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct DiscoveryFilter {
+    pub uuids: Option<Vec<Uuid>>,
+    pub rssi: Option<i16>,
+    pub path_loss: Option<u16>,
+    pub transport: Transport,
+    pub duplicate_data: bool,
+    pub discoverable: bool,
+    pub pattern: String,
+}
+
+impl Default for DiscoveryFilter {
+    fn default() -> Self {
+        Self {
+            uuids: None,
+            rssi: None,
+            path_loss: None,
+            transport: Transport::Auto,
+            duplicate_data: true,
+            discoverable: false,
+            pattern: "".into(),
+        }
+    }
+}
+
 pub struct Adapter {
     bluez: Rc<Bluez>,
     adapter: DBusProxy,
@@ -229,6 +272,41 @@ impl Adapter {
 
     pub fn stop_discovery(&self) -> Result<(), Error> {
         Ok(self.adapter.stop_discovery()?)
+    }
+
+    pub fn set_discovery_filter(&self, filter: DiscoveryFilter) -> Result<(), Error> {
+        let mut properties: HashMap<String, dbus::arg::Variant<Box<dyn dbus::arg::RefArg>>> =
+            HashMap::new();
+        if let Some(uuids) = filter.uuids {
+            let uuids: Vec<String> = uuids
+                .into_iter()
+                .map(|u| Uuid::to_string(&u))
+                .collect::<Vec<String>>();
+            properties.insert("UUIDs".into(), dbus::arg::Variant(Box::new(uuids)));
+        }
+        if let Some(rssi) = filter.rssi {
+            properties.insert("RSSI".into(), dbus::arg::Variant(Box::new(rssi)));
+        }
+        if let Some(path_loss) = filter.path_loss {
+            properties.insert("Pathloss".into(), dbus::arg::Variant(Box::new(path_loss)));
+        }
+        properties.insert(
+            "Transport".into(),
+            dbus::arg::Variant(Box::new(filter.transport.to_string())),
+        );
+        properties.insert(
+            "DuplicateData".into(),
+            dbus::arg::Variant(Box::new(filter.duplicate_data)),
+        );
+        properties.insert(
+            "Discoverable".into(),
+            dbus::arg::Variant(Box::new(filter.discoverable)),
+        );
+        properties.insert(
+            "Pattern".into(),
+            dbus::arg::Variant(Box::new(filter.pattern)),
+        );
+        Ok(self.adapter.set_discovery_filter(properties)?)
     }
 
     pub fn powered(&self) -> Result<bool, Error> {
